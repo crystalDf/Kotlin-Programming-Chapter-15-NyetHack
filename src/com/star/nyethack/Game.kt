@@ -85,25 +85,6 @@ object Game {
         println(result)
     }
 
-    private fun move(directionInput: String) =
-        try {
-            val direction = Direction.valueOf(directionInput.toUpperCase())
-            val newPosition = direction.updateCoordinate(player.currentPosition)
-
-            if (!newPosition.isInBounds) {
-                throw IllegalStateException("$direction is out of bounds.")
-            }
-
-            val newRoom = worldMap[newPosition.y][newPosition.x]
-            player.currentPosition = newPosition
-            currentRoom = newRoom
-
-            "OK, you move $direction to the ${newRoom.name}.\n${newRoom.load()}"
-
-        } catch (e: Exception) {
-            "Invalid direction: $directionInput."
-        }
-
     private class GameInput(arg: String?) {
 
         private val input = arg ?: ""
@@ -112,15 +93,30 @@ object Game {
 
         fun processCommand() = when (command.toLowerCase()) {
             "move" -> move(argument)
-            in listOf("quit", "exit") -> sayFarewell()
             "map" -> showMagicMap()
             "ring" -> ringBellInTownSquare()
+            in listOf("quit", "exit") -> sayFarewell()
             else -> commandNotFound()
         }
 
-        private fun commandNotFound() = "I'm not quite sure what you're trying to do!"
+        private fun move(directionInput: String) =
+            try {
+                val direction = Direction.valueOf(directionInput.toUpperCase())
+                val newPosition = direction.updateCoordinate(player.currentPosition)
 
-        private fun sayFarewell() = "See you."
+                if (!newPosition.isInBounds) {
+                    throw IllegalStateException("$direction is out of bounds.")
+                }
+
+                val newRoom = worldMap[newPosition.y][newPosition.x]
+                player.currentPosition = newPosition
+                currentRoom = newRoom
+
+                "OK, you move $direction to the ${newRoom.name}.\n${newRoom.load()}"
+
+            } catch (e: Exception) {
+                "Invalid direction: $directionInput."
+            }
 
         private fun showMagicMap(): String {
 
@@ -139,5 +135,8 @@ object Game {
         private fun ringBellInTownSquare() = if (currentRoom is TownSquare)
             (currentRoom as TownSquare).ringBell() else "You are not in the Town Square."
 
+        private fun sayFarewell() = "See you."
+
+        private fun commandNotFound() = "I'm not quite sure what you're trying to do!"
     }
 }
